@@ -1,0 +1,19 @@
+# Ao enviar uma tag (ex.: v1.0.2), compila o ListaDaVez.exe e publica um Release no GitHub.
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar
+        shell: cmd
+        run: build.bat
+      - name: Publicar release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ListaDaVez.exe

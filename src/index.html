@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Lista da Vez</title>
+<style>
+  :root { --rosa:#b5535b; --rosa2:#f6e7e8; --cinza:#6b6b6b; --borda:#e2dede; --verde:#2e8b57; --verm:#c0392b; --azul:#2c6db5; }
+  * { box-sizing:border-box; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { margin:0; background:#faf8f8; color:#222; }
+  header { background:var(--rosa); color:#fff; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
+  header h1 { margin:0; font-size:20px; letter-spacing:1px; }
+  header small { opacity:.9; }
+  nav { display:flex; background:#fff; border-bottom:1px solid var(--borda); position:sticky; top:48px; z-index:4; }
+  nav button { flex:1; padding:12px 4px; border:0; background:none; font-size:15px; color:var(--cinza); border-bottom:3px solid transparent; cursor:pointer; }
+  nav button.ativo { color:var(--rosa); border-color:var(--rosa); font-weight:600; }
+  main { max-width:1000px; margin:0 auto; padding:14px; }
+  .card { background:#fff; border:1px solid var(--borda); border-radius:12px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-weight:600; margin:14px 0 6px; font-size:14px; color:#444; }
+  label:first-child { margin-top:0; }
+  select, input, textarea { width:100%; padding:12px; font-size:16px; border:1px solid #ccc; border-radius:8px; background:#fff; }
+  textarea { resize:vertical; min-height:60px; }
+  .opcoes { display:grid; gap:8px; }
+  .opcoes.c3 { grid-template-columns:repeat(3,1fr); } .opcoes.c4 { grid-template-columns:repeat(4,1fr); }
+  .opt { padding:14px 4px; border:2px solid #ddd; border-radius:10px; background:#fff; font-size:15px; font-weight:600; cursor:pointer; text-align:center; }
+  .opt small { display:block; font-weight:400; font-size:11px; color:var(--cinza); margin-top:2px; }
+  .opt.sel { border-color:var(--rosa); background:var(--rosa2); color:var(--rosa); }
+  .btn { display:inline-block; padding:14px 18px; border:0; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; background:var(--rosa); color:#fff; }
+  .btn.full { width:100%; margin-top:18px; font-size:18px; }
+  .btn.sec { background:#eee; color:#333; } .btn.peq { padding:8px 12px; font-size:14px; } .btn.perigo { background:var(--verm); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { padding:8px 6px; border-bottom:1px solid var(--borda); text-align:left; vertical-align:top; }
+  th { background:#f3eeee; font-size:12px; text-transform:uppercase; color:#555; }
+  tr.click { cursor:pointer; } tr.click:hover { background:#fcf5f5; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:12px; font-weight:700; }
+  .VD { background:#e2f4ea; color:var(--verde); } .NVD { background:#fbe5e3; color:var(--verm); } .TR { background:#e4eefa; color:var(--azul); }
+  .vazio { text-align:center; color:var(--cinza); padding:30px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .kpi { background:#fff; border:1px solid var(--borda); border-radius:12px; padding:14px; text-align:center; }
+  .kpi b { display:block; font-size:28px; color:var(--rosa); } .kpi span { font-size:13px; color:var(--cinza); }
+  .linha { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .linha > * { flex:1; min-width:120px; }
+  .barra { height:10px; background:#eee; border-radius:5px; overflow:hidden; } .barra i { display:block; height:100%; background:var(--rosa); }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:12px 20px; border-radius:10px; opacity:0; transition:.3s; pointer-events:none; z-index:20; }
+  .toast.on { opacity:1; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; justify-content:center; z-index:10; }
+  .modal.on { display:flex; }
+  .modal .card { width:100%; max-width:560px; max-height:92vh; overflow:auto; margin:0; border-radius:16px 16px 0 0; }
+  @media (min-width:700px){ .modal { align-items:center; } .modal .card { border-radius:16px; } }
+  .muted { color:var(--cinza); font-size:13px; }
+  .offline { background:var(--verm); color:#fff; text-align:center; padding:6px; font-size:14px; display:none; }
+  @media (max-width:600px){ .hide-m { display:none; } }
+</style>
+</head>
+<body>
+<header><h1>LISTA DA VEZ</h1><small id="relogio"></small></header>
+<div class="offline" id="offline">Sem conexão com o servidor (PC do caixa). Tentando reconectar…</div>
+<nav>
+  <button data-aba="registrar" class="ativo">Registrar</button>
+  <button data-aba="lista">Lista</button>
+  <button data-aba="consolidado">Consolidado</button>
+  <button data-aba="config">Config.</button>
+</nav>
+<main>
+  <!-- REGISTRAR -->
+  <section id="aba-registrar">
+    <div class="card" id="form"></div>
+  </section>
+
+  <!-- LISTA -->
+  <section id="aba-lista" hidden>
+    <div class="card">
+      <div class="linha">
+        <input type="date" id="lista-data">
+        <select id="lista-filtro"><option value="">Todas as vendedoras</option></select>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:auto"><table id="tabela"></table></div>
+    <p class="muted">Toque em uma linha para editar. O horário não pode ser alterado.</p>
+  </section>
+
+  <!-- CONSOLIDADO -->
+  <section id="aba-consolidado" hidden>
+    <div class="card">
+      <div class="linha">
+        <div><label>De</label><input type="date" id="cons-de"></div>
+        <div><label>Até</label><input type="date" id="cons-ate"></div>
+      </div>
+      <div class="linha" style="margin-top:10px">
+        <button class="btn sec peq" data-per="hoje">Hoje</button>
+        <button class="btn sec peq" data-per="semana">7 dias</button>
+        <button class="btn sec peq" data-per="mes">Este mês</button>
+      </div>
+    </div>
+    <div id="cons"></div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="aba-config" hidden>
+    <div class="card">
+      <h3 style="margin-top:0">Vendedoras</h3>
+      <div class="linha"><input id="nova-vend" placeholder="Nome da vendedora"><button class="btn" id="add-vend" style="flex:0">Adicionar</button></div>
+      <div id="lista-vend" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Exportar para Excel (CSV)</h3>
+      <div class="linha">
+        <div><label>De</label><input type="date" id="csv-de"></div>
+        <div><label>Até</label><input type="date" id="csv-ate"></div>
+      </div>
+      <button class="btn full" id="baixar-csv">Baixar planilha</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Acesso pelo celular</h3>
+      <p class="muted">Conecte o celular no Wi‑Fi da loja e abra no navegador:</p>
+      <div id="enderecos"></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal"><div class="card" id="modal-corpo"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const COMPRA = [["VD","Vendido"],["NVD","Não vendido"],["TR","Troca"]];
+const ORIGEM = [["PSS","Passagem"],["RD","Redes sociais"],["WL","Whats/Lig."],["IND","Indicação"]];
+const NOME_ORIGEM = Object.fromEntries(ORIGEM);
+let vendedoras = [], versao = 0, abaAtual = "registrar", cacheLista = [];
+
+const $ = s => document.querySelector(s);
+const hojeStr = (d = new Date()) => new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+const esc = s => (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtData = s => s.split("-").reverse().join("/");
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2200); }
+
+async function api(metodo, url, corpo){
+  const r = await fetch(url, { method:metodo, headers:{"Content-Type":"application/json"}, body: corpo ? JSON.stringify(corpo) : undefined });
+  const j = await r.json(); if (!r.ok) throw new Error(j.erro || "Erro"); return j;
+}
+async function estado(de, ate){ return api("GET", `/api/estado?de=${de}&ate=${ate||de}`); }
+
+// ---------- formulário (usado no registrar e no editar) ----------
+function montarForm(el, reg, aoSalvar, extras){
+  const v = { vendedora: reg.vendedora || localStorage.ultimaVendedora || "", compra: reg.compra || "", origem: reg.origem || "", cliente: reg.cliente||"", obs: reg.obs||"" };
+  const opts = (lista, campo, cls) => `<div class="opcoes ${cls}">` + lista.map(([k,n]) =>
+      `<button type="button" class="opt ${v[campo]===k?"sel":""}" data-campo="${campo}" data-val="${k}">${k}<small>${n}</small></button>`).join("") + "</div>";
+  el.innerHTML = `
+    ${reg.id ? `<h3 style="margin-top:0">Editar atendimento — ${fmtData(reg.data)} às ${reg.hora}</h3>` : ""}
+    <label>Vendedora</label>
+    <select name="vendedora"><option value="">— selecione —</option>${vendedoras.map(n=>`<option ${n===v.vendedora?"selected":""}>${esc(n)}</option>`).join("")}</select>
+    ${vendedoras.length ? "" : `<p class="muted">Nenhuma vendedora cadastrada. Vá em <b>Config.</b> para adicionar.</p>`}
+    <label>Comprou?</label>${opts(COMPRA,"compra","c3")}
+    <label>Como o cliente conheceu a loja?</label>${opts(ORIGEM,"origem","c4")}
+    <label>Nome do cliente</label><input name="cliente" value="${esc(v.cliente)}" placeholder="Opcional">
+    <label>Observações</label><textarea name="obs" placeholder="Opcional">${esc(v.obs)}</textarea>
+    <button class="btn full" data-salvar>${reg.id ? "Salvar alterações" : "Registrar minha vez"}</button>
+    ${extras||""}`;
+  el.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const c=b.dataset.campo; v[c] = v[c]===b.dataset.val ? "" : b.dataset.val;
+    el.querySelectorAll(`.opt[data-campo=${c}]`).forEach(x => x.classList.toggle("sel", x.dataset.val===v[c]));
+  });
+  el.querySelector("[data-salvar]").onclick = async () => {
+    v.vendedora = el.querySelector("[name=vendedora]").value;
+    v.cliente = el.querySelector("[name=cliente]").value; v.obs = el.querySelector("[name=obs]").value;
+    if (!v.vendedora) return toast("Selecione a vendedora");
+    if (!v.compra) return toast("Informe se o cliente comprou");
+    try { await aoSalvar(v); } catch(e){ toast(e.message); }
+  };
+}
+
+function renderRegistrar(){
+  montarForm($("#form"), {}, async v => {
+    const r = await api("POST","/api/registros",v);
+    localStorage.ultimaVendedora = v.vendedora;
+    toast(`Vez registrada às ${r.hora} ✔`);
+    renderRegistrar(); checar(true);
+  });
+}
+
+// ---------- lista ----------
+async function renderLista(){
+  const data = $("#lista-data").value, filtro = $("#lista-filtro").value;
+  const e = await estado(data);
+  cacheLista = e.registros;
+  const regs = e.registros.filter(r => !filtro || r.vendedora===filtro);
+  $("#tabela").innerHTML = regs.length ? `
+    <tr><th>#</th><th>Hora</th><th>Vendedora</th><th>Comprou</th><th>Origem</th><th>Cliente</th><th class="hide-m">Obs.</th></tr>` +
+    regs.map((r,i)=>`<tr class="click" data-id="${r.id}"><td>${i+1}</td><td>${r.hora}</td><td>${esc(r.vendedora)}</td>
+      <td>${r.compra?`<span class="tag ${r.compra}">${r.compra}</span>`:""}</td><td>${r.origem||""}</td><td>${esc(r.cliente)}</td>
+      <td class="hide-m">${esc(r.obs)}${r.alteradoEm?`<div class="muted">editado ${r.alteradoEm}</div>`:""}</td></tr>`).join("")
+    : `<tr><td class="vazio">Nenhum atendimento em ${fmtData(data)}.</td></tr>`;
+  $("#tabela").querySelectorAll("tr.click").forEach(tr => tr.onclick = () => editar(cacheLista.find(r=>r.id==tr.dataset.id)));
+}
+
+function fecharModal(){ $("#modal").classList.remove("on"); }
+$("#modal").onclick = e => { if (e.target.id==="modal") fecharModal(); };
+function editar(reg){
+  const el = $("#modal-corpo");
+  montarForm(el, reg, async v => { await api("PUT",`/api/registros/${reg.id}`,v); fecharModal(); toast("Alterado ✔"); checar(true); },
+    `<div class="linha" style="margin-top:10px"><button class="btn sec" data-fechar>Cancelar</button><button class="btn perigo" data-excluir>Excluir</button></div>`);
+  el.querySelector("[data-fechar]").onclick = fecharModal;
+  el.querySelector("[data-excluir]").onclick = async () => {
+    if (!confirm(`Excluir o atendimento das ${reg.hora} de ${reg.vendedora}?`)) return;
+    await api("DELETE",`/api/registros/${reg.id}`); fecharModal(); toast("Excluído"); checar(true);
+  };
+  $("#modal").classList.add("on");
+}
+
+// ---------- consolidado ----------
+function pct(a,b){ return b ? Math.round(a*1000/b)/10 + "%" : "0%"; }
+async function renderConsolidado(){
+  const de=$("#cons-de").value, ate=$("#cons-ate").value;
+  const e = await estado(de, ate), R = e.registros;
+  const vend = R.filter(r=>r.compra==="VD").length, tr = R.filter(r=>r.compra==="TR").length;
+  const atend = R.length;
+  const porOrigem = ORIGEM.map(([k,n]) => [k,n,R.filter(r=>r.origem===k).length]);
+  const comOrigem = porOrigem.reduce((s,x)=>s+x[2],0);
+  const nomes = [...new Set(R.map(r=>r.vendedora))].sort();
+  const porVend = nomes.map(n => { const x=R.filter(r=>r.vendedora===n); const v=x.filter(r=>r.compra==="VD").length; return {n, a:x.length, v, nv:x.filter(r=>r.compra==="NVD").length, t:x.filter(r=>r.compra==="TR").length}; })
+                       .sort((a,b)=>b.v-a.v);
+  $("#cons").innerHTML = `
+    <div class="kpis" style="margin-bottom:14px">
+      <div class="kpi"><b>${atend}</b><span>Total de atendimentos</span></div>
+      <div class="kpi"><b>${vend}</b><span>Total de vendas</span></div>
+      <div class="kpi"><b>${pct(vend,atend)}</b><span>Taxa de conversão</span></div>
+      <div class="kpi"><b>${tr}</b><span>Trocas</span></div>
+    </div>
+    <div class="card"><h3 style="margin-top:0">Como o cliente chegou</h3>
+      ${porOrigem.map(([k,n,q])=>`<div style="margin:10px 0"><div class="linha" style="justify-content:space-between"><span style="flex:0 0 auto"><b>${k}</b> — ${n}</span><span style="flex:0 0 auto">${q} (${pct(q,comOrigem)})</span></div>
+        <div class="barra"><i style="width:${comOrigem?q*100/comOrigem:0}%"></i></div></div>`).join("")}
+    </div>
+    <div class="card" style="padding:0;overflow:auto"><table>
+      <tr><th>Vendedora</th><th>Atend.</th><th>VD</th><th>NVD</th><th>TR</th><th>Conv.</th></tr>
+      ${porVend.map(x=>`<tr><td>${esc(x.n)}</td><td>${x.a}</td><td>${x.v}</td><td>${x.nv}</td><td>${x.t}</td><td><b>${pct(x.v,x.a)}</b></td></tr>`).join("") || `<tr><td class="vazio" colspan="6">Sem dados no período.</td></tr>`}
+    </table></div>`;
+}
+document.querySelectorAll("[data-per]").forEach(b => b.onclick = () => {
+  const h = new Date(); let de = new Date(h);
+  if (b.dataset.per==="semana") de.setDate(h.getDate()-6);
+  if (b.dataset.per==="mes") de = new Date(h.getFullYear(), h.getMonth(), 1);
+  $("#cons-de").value = hojeStr(de); $("#cons-ate").value = hojeStr(h); renderConsolidado();
+});
+
+// ---------- config ----------
+function renderConfig(e){
+  $("#lista-vend").innerHTML = vendedoras.map(n=>`<div class="linha" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--borda)">
+    <span>${esc(n)}</span><button class="btn sec peq" style="flex:0" data-rem="${esc(n)}">Remover</button></div>`).join("") || `<p class="muted">Nenhuma cadastrada.</p>`;
+  $("#lista-vend").querySelectorAll("[data-rem]").forEach(b => b.onclick = async () => {
+    if (!confirm(`Remover ${b.dataset.rem}? (os registros antigos continuam salvos)`)) return;
+    await api("DELETE","/api/vendedoras?nome="+encodeURIComponent(b.dataset.rem)); checar(true);
+  });
+  if (e) $("#enderecos").innerHTML = e.ips.map(ip=>`<p style="font-size:20px;font-weight:700;margin:6px 0">http://${ip}:${e.porta}</p>`).join("");
+}
+$("#add-vend").onclick = async () => {
+  const n = $("#nova-vend").value.trim(); if (!n) return;
+  await api("POST","/api/vendedoras",{nome:n}); $("#nova-vend").value=""; toast("Adicionada ✔"); checar(true);
+};
+$("#nova-vend").onkeydown = e => { if (e.key==="Enter") $("#add-vend").click(); };
+$("#baixar-csv").onclick = () => location.href = `/api/csv?de=${$("#csv-de").value}&ate=${$("#csv-ate").value}`;
+
+// ---------- navegação e sincronização ----------
+function render(e){
+  const filtro = $("#lista-filtro"), atual = filtro.value;
+  filtro.innerHTML = `<option value="">Todas as vendedoras</option>` + vendedoras.map(n=>`<option ${n===atual?"selected":""}>${esc(n)}</option>`).join("");
+  if (abaAtual==="lista") renderLista();
+  if (abaAtual==="consolidado") renderConsolidado();
+  if (abaAtual==="config") renderConfig(e);
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  abaAtual = b.dataset.aba;
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("ativo", x===b));
+  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== "aba-"+abaAtual);
+  checar(true).then(() => { if (abaAtual==="registrar") renderRegistrar(); });
+});
+["#lista-data","#lista-filtro"].forEach(s => $(s).onchange = renderLista);
+["#cons-de","#cons-ate"].forEach(s => $(s).onchange = renderConsolidado);
+
+async function checar(forcar){
+  try {
+    const { versao: v } = await api("GET","/api/versao");
+    $("#offline").style.display = "none";
+    if (forcar || v !== versao) {
+      const formAberto = $("#modal").classList.contains("on");
+      const e = await estado(hojeStr()); versao = v;
+      const mudouVend = JSON.stringify(e.vendedoras) !== JSON.stringify(vendedoras);
+      vendedoras = e.vendedoras;
+      if (mudouVend && abaAtual==="registrar" && !document.activeElement.closest?.("#form")) renderRegistrar();
+      if (!formAberto) render(e);
+    }
+  } catch { $("#offline").style.display = "block"; }
+}
+
+[ "#lista-data","#cons-de","#cons-ate","#csv-de","#csv-ate" ].forEach(s => $(s).value = hojeStr());
+$("#csv-de").value = hojeStr(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+setInterval(() => { const d=new Date(); $("#relogio").textContent = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}); }, 1000);
+renderRegistrar(); checar(true).then(renderRegistrar);
+setInterval(checar, 3000);
+</script>
+</body>
+</html>
