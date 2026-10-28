@@ -44,7 +44,7 @@ public static class Servidor
     static long versao = DateTime.Now.Ticks;
 
     // ---------- atualização automática via GitHub Releases ----------
-    public const string VERSAO = "1.0.1";                 // altere a cada release (tag v1.0.1)
+    public const string VERSAO = "1.1.0";                 // altere a cada release (tag v1.1.0)
     const string REPO = "pridema1/listavezpalhador";
 
     static void Atualizar()

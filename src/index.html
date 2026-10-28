@@ -3,57 +3,102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Lista da Vez</title>
+<title>Lista da Vez · Palhadór</title>
+<meta name="theme-color" content="#C4A6A2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23C4A6A2'/%3E%3Ctext x='32' y='47' text-anchor='middle' font-family='Georgia,serif' font-size='44' fill='%23fff'%3EP%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --rosa:#b5535b; --rosa2:#f6e7e8; --cinza:#6b6b6b; --borda:#e2dede; --verde:#2e8b57; --verm:#c0392b; --azul:#2c6db5; }
-  * { box-sizing:border-box; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  body { margin:0; background:#faf8f8; color:#222; }
-  header { background:var(--rosa); color:#fff; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
-  header h1 { margin:0; font-size:20px; letter-spacing:1px; }
-  header small { opacity:.9; }
-  nav { display:flex; background:#fff; border-bottom:1px solid var(--borda); position:sticky; top:48px; z-index:4; }
-  nav button { flex:1; padding:12px 4px; border:0; background:none; font-size:15px; color:var(--cinza); border-bottom:3px solid transparent; cursor:pointer; }
-  nav button.ativo { color:var(--rosa); border-color:var(--rosa); font-weight:600; }
-  main { max-width:1000px; margin:0 auto; padding:14px; }
-  .card { background:#fff; border:1px solid var(--borda); border-radius:12px; padding:16px; margin-bottom:14px; }
-  label { display:block; font-weight:600; margin:14px 0 6px; font-size:14px; color:#444; }
+  /* Identidade visual Palhadór */
+  :root {
+    --rosa:#C4A6A2;        /* rosé principal (digital) */
+    --rosa-forte:#9A7671;  /* rosé escurecido para textos/botões legíveis */
+    --rosa2:#EBD9D9;       /* rosé claro (digital) */
+    --rosa3:#F5ECEC;       /* rosé bem suave para fundos */
+    --taupe:#9C8F8C;       /* cinza-taupe da marca */
+    --offwhite:#F6F6F6;
+    --preto:#141111;
+    --cinza:#7d7270; --borda:#E8DCDA;
+    --verde:#5E8466; --verm:#A65750; --azul:#6A7894;
+    --serif:"Marcellus","Cormorant Garamond",Georgia,"Times New Roman",serif;
+    --sans:"Cabin",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  * { box-sizing:border-box; font-family:var(--sans); }
+  body { margin:0; background:var(--offwhite); color:var(--preto); }
+  h3 { font-family:var(--serif); font-weight:400; letter-spacing:.5px; color:var(--rosa-forte); font-size:20px; }
+  header { background:var(--rosa); color:#fff; height:60px; padding:0 18px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
+  header .marca { display:flex; align-items:baseline; gap:12px; }
+  header h1 { margin:0; font-family:var(--serif); font-weight:400; font-size:26px; letter-spacing:3px; }
+  header .marca span { font-size:11px; letter-spacing:3px; text-transform:uppercase; opacity:.9; }
+  header small { opacity:.95; letter-spacing:1px; font-size:13px; }
+  nav { display:flex; background:#fff; border-bottom:1px solid var(--borda); position:sticky; top:60px; z-index:4; }
+  nav button { flex:1; padding:14px 4px; border:0; background:none; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:var(--taupe); border-bottom:2px solid transparent; cursor:pointer; }
+  nav button.ativo { color:var(--rosa-forte); border-color:var(--rosa); font-weight:600; }
+  main { max-width:1000px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border:1px solid var(--borda); border-radius:6px; padding:18px; margin-bottom:14px; box-shadow:0 1px 3px rgba(154,118,113,.06); }
+  label { display:block; font-weight:600; margin:16px 0 6px; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--cinza); }
   label:first-child { margin-top:0; }
-  select, input, textarea { width:100%; padding:12px; font-size:16px; border:1px solid #ccc; border-radius:8px; background:#fff; }
+  select, input, textarea { width:100%; padding:12px; font-size:16px; border:1px solid var(--borda); border-radius:4px; background:#fff; color:var(--preto); }
+  select:focus, input:focus, textarea:focus { outline:none; border-color:var(--rosa); box-shadow:0 0 0 3px var(--rosa2); }
   textarea { resize:vertical; min-height:60px; }
   .opcoes { display:grid; gap:8px; }
   .opcoes.c3 { grid-template-columns:repeat(3,1fr); } .opcoes.c4 { grid-template-columns:repeat(4,1fr); }
-  .opt { padding:14px 4px; border:2px solid #ddd; border-radius:10px; background:#fff; font-size:15px; font-weight:600; cursor:pointer; text-align:center; }
-  .opt small { display:block; font-weight:400; font-size:11px; color:var(--cinza); margin-top:2px; }
-  .opt.sel { border-color:var(--rosa); background:var(--rosa2); color:var(--rosa); }
-  .btn { display:inline-block; padding:14px 18px; border:0; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; background:var(--rosa); color:#fff; }
-  .btn.full { width:100%; margin-top:18px; font-size:18px; }
-  .btn.sec { background:#eee; color:#333; } .btn.peq { padding:8px 12px; font-size:14px; } .btn.perigo { background:var(--verm); }
+  .opt { padding:14px 4px; border:1px solid var(--borda); border-radius:4px; background:#fff; font-size:15px; font-weight:600; letter-spacing:1px; color:var(--preto); cursor:pointer; text-align:center; transition:background .15s, border-color .15s; }
+  .opt small { display:block; font-weight:400; font-size:11px; letter-spacing:0; color:var(--cinza); margin-top:2px; }
+  .opt:hover { border-color:var(--rosa); }
+  .opt.sel { border-color:var(--rosa); background:var(--rosa2); color:var(--rosa-forte); box-shadow:inset 0 0 0 1px var(--rosa); }
+  .btn { display:inline-block; padding:14px 18px; border:0; border-radius:4px; font-size:14px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; background:var(--rosa-forte); color:#fff; transition:filter .15s; }
+  .btn:hover { filter:brightness(1.07); }
+  .btn.full { width:100%; margin-top:20px; font-size:15px; padding:16px; }
+  .btn.sec { background:var(--rosa3); color:var(--rosa-forte); } .btn.peq { padding:8px 12px; font-size:12px; } .btn.perigo { background:var(--verm); }
   table { width:100%; border-collapse:collapse; font-size:14px; }
-  th, td { padding:8px 6px; border-bottom:1px solid var(--borda); text-align:left; vertical-align:top; }
-  th { background:#f3eeee; font-size:12px; text-transform:uppercase; color:#555; }
-  tr.click { cursor:pointer; } tr.click:hover { background:#fcf5f5; }
-  .tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:12px; font-weight:700; }
-  .VD { background:#e2f4ea; color:var(--verde); } .NVD { background:#fbe5e3; color:var(--verm); } .TR { background:#e4eefa; color:var(--azul); }
+  th, td { padding:10px 8px; border-bottom:1px solid var(--borda); text-align:left; vertical-align:top; }
+  th { background:var(--rosa3); font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--rosa-forte); font-weight:600; }
+  tr.click { cursor:pointer; } tr.click:hover { background:var(--rosa3); }
+  .tag { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.5px; }
+  .VD { background:#E6EEE7; color:var(--verde); } .NVD { background:#F3E2E0; color:var(--verm); } .TR { background:#E7E9EF; color:var(--azul); }
   .vazio { text-align:center; color:var(--cinza); padding:30px; }
   .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
-  .kpi { background:#fff; border:1px solid var(--borda); border-radius:12px; padding:14px; text-align:center; }
-  .kpi b { display:block; font-size:28px; color:var(--rosa); } .kpi span { font-size:13px; color:var(--cinza); }
+  .kpi { background:#fff; border:1px solid var(--borda); border-top:3px solid var(--rosa); border-radius:6px; padding:16px 14px; text-align:center; }
+  .kpi b { display:block; font-family:var(--serif); font-weight:400; font-size:32px; color:var(--rosa-forte); } .kpi span { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--cinza); }
   .linha { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .linha > * { flex:1; min-width:120px; }
-  .barra { height:10px; background:#eee; border-radius:5px; overflow:hidden; } .barra i { display:block; height:100%; background:var(--rosa); }
-  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:12px 20px; border-radius:10px; opacity:0; transition:.3s; pointer-events:none; z-index:20; }
+  .barra { height:8px; background:var(--rosa3); border-radius:4px; overflow:hidden; } .barra i { display:block; height:100%; background:var(--rosa); }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--preto); color:var(--rosa2); padding:12px 22px; border-radius:4px; letter-spacing:.5px; opacity:0; transition:.3s; pointer-events:none; z-index:20; }
   .toast.on { opacity:1; }
-  .modal { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; justify-content:center; z-index:10; }
+  .modal { position:fixed; inset:0; background:rgba(20,17,17,.45); display:none; align-items:flex-end; justify-content:center; z-index:10; }
   .modal.on { display:flex; }
-  .modal .card { width:100%; max-width:560px; max-height:92vh; overflow:auto; margin:0; border-radius:16px 16px 0 0; }
-  @media (min-width:700px){ .modal { align-items:center; } .modal .card { border-radius:16px; } }
+  .modal .card { width:100%; max-width:560px; max-height:92vh; overflow:auto; margin:0; border-radius:12px 12px 0 0; }
+  @media (min-width:700px){ .modal { align-items:center; } .modal .card { border-radius:8px; } }
   .muted { color:var(--cinza); font-size:13px; }
   .offline { background:var(--verm); color:#fff; text-align:center; padding:6px; font-size:14px; display:none; }
-  @media (max-width:600px){ .hide-m { display:none; } }
+  @media (max-width:600px){ .hide-m { display:none; } header h1 { font-size:22px; letter-spacing:2px; } header .marca span { display:none; } }
+
+  /* Relatório PDF (gerado via impressão do navegador) */
+  #relatorio { display:none; }
+  @media print {
+    @page { size:A4; margin:14mm 12mm; }
+    body { background:#fff; }
+    body > *:not(#relatorio) { display:none !important; }
+    #relatorio { display:block; color:var(--preto); font-size:11px; }
+    #relatorio * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .rel-topo { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid var(--rosa); padding-bottom:8px; margin-bottom:14px; }
+    .rel-topo h1 { margin:0; font-family:var(--serif); font-weight:400; font-size:28px; letter-spacing:4px; color:var(--rosa-forte); }
+    .rel-topo div { text-align:right; font-size:11px; color:var(--cinza); letter-spacing:1px; text-transform:uppercase; }
+    .rel-topo b { display:block; font-size:13px; color:var(--preto); letter-spacing:.5px; text-transform:none; }
+    #relatorio h2 { font-family:var(--serif); font-weight:400; font-size:15px; color:var(--rosa-forte); margin:16px 0 6px; letter-spacing:.5px; }
+    #relatorio .kpis { grid-template-columns:repeat(4,1fr); gap:8px; }
+    #relatorio .kpi { padding:8px; } #relatorio .kpi b { font-size:22px; }
+    #relatorio table { font-size:10px; } #relatorio th, #relatorio td { padding:5px 6px; }
+    #relatorio tr { break-inside:avoid; }
+    #relatorio thead { display:table-header-group; }
+    .rel-rodape { margin-top:16px; font-size:9px; color:var(--taupe); text-align:center; letter-spacing:1px; }
+  }
 </style>
 </head>
 <body>
-<header><h1>LISTA DA VEZ</h1><small id="relogio"></small></header>
+<header><div class="marca"><h1>PALHADÓR</h1><span>Lista da Vez</span></div><small id="relogio"></small></header>
 <div class="offline" id="offline">Sem conexão com o servidor (PC do caixa). Tentando reconectar…</div>
 <nav>
   <button data-aba="registrar" class="ativo">Registrar</button>
@@ -103,12 +148,16 @@
       <div id="lista-vend" style="margin-top:12px"></div>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">Exportar para Excel (CSV)</h3>
+      <h3 style="margin-top:0">Exportar planilha</h3>
       <div class="linha">
         <div><label>De</label><input type="date" id="csv-de"></div>
         <div><label>Até</label><input type="date" id="csv-ate"></div>
       </div>
-      <button class="btn full" id="baixar-csv">Baixar planilha</button>
+      <div class="linha" style="margin-top:20px">
+        <button class="btn" id="baixar-csv">Excel (CSV)</button>
+        <button class="btn" id="baixar-pdf">PDF</button>
+      </div>
+      <p class="muted">No PDF, escolha <b>“Salvar como PDF”</b> como impressora.</p>
     </div>
     <div class="card">
       <h3 style="margin-top:0">Acesso pelo celular</h3>
@@ -120,6 +169,7 @@
 
 <div class="modal" id="modal"><div class="card" id="modal-corpo"></div></div>
 <div class="toast" id="toast"></div>
+<div id="relatorio"></div>
 
 <script>
 const COMPRA = [["VD","Vendido"],["NVD","Não vendido"],["TR","Troca"]];
@@ -257,6 +307,48 @@ $("#add-vend").onclick = async () => {
 };
 $("#nova-vend").onkeydown = e => { if (e.key==="Enter") $("#add-vend").click(); };
 $("#baixar-csv").onclick = () => location.href = `/api/csv?de=${$("#csv-de").value}&ate=${$("#csv-ate").value}`;
+$("#baixar-pdf").onclick = async () => {
+  const de = $("#csv-de").value, ate = $("#csv-ate").value;
+  if (!de || !ate) return toast("Informe o período");
+  let R;
+  try { R = (await estado(de, ate)).registros; } catch(e){ return toast("Sem conexão com o servidor"); }
+  if (!R.length) return toast("Nenhum atendimento no período");
+  const NOME_COMPRA = Object.fromEntries(COMPRA);
+  const vend = R.filter(r=>r.compra==="VD").length, trocas = R.filter(r=>r.compra==="TR").length;
+  const nomes = [...new Set(R.map(r=>r.vendedora))].sort();
+  const porVend = nomes.map(n => { const x=R.filter(r=>r.vendedora===n); return {n, a:x.length, v:x.filter(r=>r.compra==="VD").length, nv:x.filter(r=>r.compra==="NVD").length, t:x.filter(r=>r.compra==="TR").length}; }).sort((a,b)=>b.v-a.v);
+  const porOrigem = ORIGEM.map(([k,n]) => [k,n,R.filter(r=>r.origem===k).length]);
+  const comOrigem = porOrigem.reduce((s,x)=>s+x[2],0);
+  const periodo = de===ate ? fmtData(de) : `${fmtData(de)} a ${fmtData(ate)}`;
+  const agora = new Date();
+  $("#relatorio").innerHTML = `
+    <div class="rel-topo"><h1>PALHADÓR</h1><div>Lista da Vez<b>${periodo}</b></div></div>
+    <div class="kpis">
+      <div class="kpi"><b>${R.length}</b><span>Atendimentos</span></div>
+      <div class="kpi"><b>${vend}</b><span>Vendas</span></div>
+      <div class="kpi"><b>${pct(vend,R.length)}</b><span>Conversão</span></div>
+      <div class="kpi"><b>${trocas}</b><span>Trocas</span></div>
+    </div>
+    <h2>Desempenho por vendedora</h2>
+    <table><thead><tr><th>Vendedora</th><th>Atend.</th><th>VD</th><th>NVD</th><th>TR</th><th>Conv.</th></tr></thead><tbody>
+      ${porVend.map(x=>`<tr><td>${esc(x.n)}</td><td>${x.a}</td><td>${x.v}</td><td>${x.nv}</td><td>${x.t}</td><td><b>${pct(x.v,x.a)}</b></td></tr>`).join("")}
+    </tbody></table>
+    <h2>Como o cliente chegou</h2>
+    <table><thead><tr><th>Origem</th><th>Qtd.</th><th>%</th></tr></thead><tbody>
+      ${porOrigem.map(([k,n,q])=>`<tr><td><b>${k}</b> — ${n}</td><td>${q}</td><td>${pct(q,comOrigem)}</td></tr>`).join("")}
+    </tbody></table>
+    <h2>Atendimentos</h2>
+    <table><thead><tr><th>Data</th><th>Hora</th><th>Vendedora</th><th>Comprou</th><th>Origem</th><th>Cliente</th><th>Observações</th></tr></thead><tbody>
+      ${R.map(r=>`<tr><td>${fmtData(r.data)}</td><td>${r.hora}</td><td>${esc(r.vendedora)}</td>
+        <td>${r.compra?`<span class="tag ${r.compra}">${NOME_COMPRA[r.compra]||r.compra}</span>`:""}</td>
+        <td>${NOME_ORIGEM[r.origem]||""}</td><td>${esc(r.cliente)}</td><td>${esc(r.obs)}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="rel-rodape">Gerado em ${agora.toLocaleDateString("pt-BR")} às ${agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div>`;
+  const tituloOriginal = document.title;
+  document.title = `lista-da-vez_${de}_${ate}`; // vira o nome sugerido do arquivo PDF
+  window.addEventListener("afterprint", () => { document.title = tituloOriginal; }, { once:true });
+  window.print();
+};
 
 // ---------- navegação e sincronização ----------
 function render(e){
